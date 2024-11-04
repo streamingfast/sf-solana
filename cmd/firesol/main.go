@@ -27,9 +27,8 @@ func init() {
 }
 
 func main() {
-
 	if err := rootCmd.Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Whoops. There was an error while executing your CLI '%s'", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Oops! There was an error while executing your command '%s'", err)
 		os.Exit(1)
 	}
 }
@@ -42,5 +41,6 @@ func newFetchCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	}
 	time.Now().UnixMilli()
 	cmd.AddCommand(rpc.NewFetchCmd(logger, tracer))
+	cmd.AddCommand(rpc.NewNextBlockCmd(logger, tracer))
 	return cmd
 }
