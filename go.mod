@@ -14,14 +14,14 @@ replace (
 require (
 	cloud.google.com/go/bigtable v1.13.0
 	github.com/gagliardetto/solana-go v1.8.4
-	github.com/klauspost/compress v1.16.6
+	github.com/klauspost/compress v1.17.11
 	github.com/mr-tron/base58 v1.2.0
 	github.com/spf13/cobra v1.7.0
 	github.com/streamingfast/binary v0.0.0-20240116152459-ebe30de95370
-	github.com/streamingfast/bstream v0.0.2-0.20240916154503-c9c5c8bbeca0
+	github.com/streamingfast/bstream v0.0.2-0.20241108153156-a5c6bc006f41
 	github.com/streamingfast/cli v0.0.4-0.20240412191021-5f81842cb71d
 	github.com/streamingfast/dstore v0.1.1-0.20241011152904-9acd6205dc14
-	github.com/streamingfast/firehose-core v1.6.5
+	github.com/streamingfast/firehose-core v1.6.7-0.20241119134312-3db0ed8c63a6
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/solana-go v0.5.1-0.20230622180848-8faf68a7cb1d
 	github.com/test-go/testify v1.1.4
@@ -146,7 +146,7 @@ require (
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20240423143010-f36784700c9a // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
-	github.com/streamingfast/dmetering v0.0.0-20241007182823-f92200a54cdb // indirect
+	github.com/streamingfast/dmetering v0.0.0-20241101155221-489f5a9d9139 // indirect
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 // indirect
@@ -154,11 +154,11 @@ require (
 	github.com/streamingfast/pbgo v0.0.6-0.20240823134334-812f6a16c5cb // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
 	github.com/streamingfast/shutter v1.5.0 // indirect
-	github.com/streamingfast/substreams v1.10.8 // indirect
+	github.com/streamingfast/substreams v1.11.1-0.20241119001236-a7bf1b7f6134 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125 // indirect
-	github.com/tidwall/gjson v1.14.1 // indirect
+	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect

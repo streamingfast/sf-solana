@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Fix startup always looking for 'first block' instead of 'cursor block', failing unnecessarily on non-archive nodes
+
 ## v1.1.0
 
 * Update to `firehose-core` version `v1.6.5`.
