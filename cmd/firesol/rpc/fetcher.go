@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"fmt"
-	firecoreRPC "github.com/streamingfast/firehose-core/rpc"
 	"strconv"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/streamingfast/cli/sflags"
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-core/blockpoller"
+	firecoreRPC "github.com/streamingfast/firehose-core/rpc"
 	"github.com/streamingfast/firehose-solana/block/fetcher"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
@@ -28,6 +28,7 @@ func NewFetchCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	cmd.Flags().String("state-dir", "/data/poller", "interval between fetch")
 	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
 	cmd.Flags().Duration("latest-block-retry-interval", time.Second, "interval between fetch")
+	cmd.Flags().Duration("max-block-fetch-duration", 3*time.Second, "interval between fetch")
 	cmd.Flags().Int("block-fetch-batch-size", 10, "Number of blocks to fetch in a single batch")
 
 	return cmd
@@ -35,8 +36,6 @@ func NewFetchCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 
 func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecutor {
 	return func(cmd *cobra.Command, args []string) (err error) {
-		ctx := cmd.Context()
-
 		stateDir := sflags.MustGetString(cmd, "state-dir")
 
 		startBlock, err := strconv.ParseUint(args[0], 10, 64)
@@ -45,6 +44,7 @@ func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecut
 		}
 
 		fetchInterval := sflags.MustGetDuration(cmd, "interval-between-fetch")
+		maxBlockFetchDuration := sflags.MustGetDuration(cmd, "max-block-fetch-duration")
 
 		logger.Info(
 			"launching firehose-solana poller",
@@ -55,7 +55,7 @@ func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecut
 		)
 
 		rpcEndpoints := sflags.MustGetStringArray(cmd, "endpoints")
-		rpcClients := firecoreRPC.NewClients[*rpc.Client]()
+		rpcClients := firecoreRPC.NewClients[*rpc.Client](maxBlockFetchDuration, firecoreRPC.NewRollingStrategyRoundRobin[*rpc.Client]())
 		for _, rpcEndpoint := range rpcEndpoints {
 			client := rpc.New(rpcEndpoint)
 			rpcClients.Add(client)
@@ -63,14 +63,15 @@ func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecut
 
 		latestBlockRetryInterval := sflags.MustGetDuration(cmd, "latest-block-retry-interval")
 
-		poller := blockpoller.New(
-			fetcher.NewRPC(rpcClients, fetchInterval, latestBlockRetryInterval, logger),
+		poller := blockpoller.New[*rpc.Client](
+			fetcher.NewRPC(fetchInterval, latestBlockRetryInterval, logger),
 			blockpoller.NewFireBlockHandler("type.googleapis.com/sf.solana.type.v1.Block"),
-			blockpoller.WithStoringState(stateDir),
-			blockpoller.WithLogger(logger),
+			rpcClients,
+			blockpoller.WithLogger[*rpc.Client](logger),
+			blockpoller.WithStoringState[*rpc.Client](stateDir),
 		)
 
-		err = poller.Run(ctx, startBlock, sflags.MustGetInt(cmd, "block-fetch-batch-size"))
+		err = poller.Run(startBlock, blockpoller.MaxStopBlock, sflags.MustGetInt(cmd, "block-fetch-batch-size"))
 		if err != nil {
 			return fmt.Errorf("running poller: %w", err)
 		}

@@ -15,7 +15,6 @@ import (
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 	bin "github.com/streamingfast/binary"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-	firecoreRPC "github.com/streamingfast/firehose-core/rpc"
 	pbsol "github.com/streamingfast/firehose-solana/pb/sf/solana/type/v1"
 	sfsol "github.com/streamingfast/solana-go"
 	"go.uber.org/zap"
@@ -35,7 +34,6 @@ var GetBlockOpts = &rpc.GetBlockOpts{
 type fetchBlock func(ctx context.Context, requestedSlot uint64) (slot uint64, out *rpc.GetBlockResult, err error)
 
 type RPCFetcher struct {
-	rpcClients               *firecoreRPC.Clients[*rpc.Client]
 	latestConfirmedSlot      uint64
 	latestFinalizedSlot      uint64
 	latestBlockRetryInterval time.Duration
@@ -44,9 +42,8 @@ type RPCFetcher struct {
 	logger                   *zap.Logger
 }
 
-func NewRPC(rpcClients *firecoreRPC.Clients[*rpc.Client], fetchInterval time.Duration, latestBlockRetryInterval time.Duration, logger *zap.Logger) *RPCFetcher {
+func NewRPC(fetchInterval time.Duration, latestBlockRetryInterval time.Duration, logger *zap.Logger) *RPCFetcher {
 	f := &RPCFetcher{
-		rpcClients:               rpcClients,
 		fetchInterval:            fetchInterval,
 		latestBlockRetryInterval: latestBlockRetryInterval,
 		logger:                   logger,
@@ -59,48 +56,40 @@ func (f *RPCFetcher) IsBlockAvailable(requestedSlot uint64) bool {
 	return requestedSlot <= f.latestConfirmedSlot
 }
 
-func (f *RPCFetcher) Fetch(ctx context.Context, requestedSlot uint64) (out *pbbstream.Block, skip bool, err error) {
+func (f *RPCFetcher) Fetch(ctx context.Context, client *rpc.Client, requestedSlot uint64) (b *pbbstream.Block, skipped bool, err error) {
 	//THIS IS A FKG Ugly hack!
 	if requestedSlot >= 13334464 && requestedSlot <= 13334475 {
 		return nil, true, nil
 	}
 
 	sleepDuration := time.Duration(0)
-	_, err = firecoreRPC.WithClients(f.rpcClients, func(client *rpc.Client) (na interface{}, err error) {
 
-		for f.latestConfirmedSlot < requestedSlot {
-			time.Sleep(sleepDuration)
-			f.latestConfirmedSlot, err = client.GetSlot(ctx, rpc.CommitmentConfirmed)
-			if err != nil {
-				return nil, fmt.Errorf("fetching latestConfirmedSlot block num: %w", err)
-			}
-
-			f.logger.Info("got latest confirmed slot block", zap.Uint64("latest_confirmed_slot", f.latestConfirmedSlot), zap.Uint64("requested_block_num", requestedSlot))
-			//
-			if f.latestConfirmedSlot >= requestedSlot {
-				break
-			}
-			sleepDuration = f.latestBlockRetryInterval
+	for f.latestConfirmedSlot < requestedSlot {
+		time.Sleep(sleepDuration)
+		f.latestConfirmedSlot, err = client.GetSlot(ctx, rpc.CommitmentConfirmed)
+		if err != nil {
+			return nil, false, fmt.Errorf("fetching latestConfirmedSlot block num: %w", err)
 		}
 
-		if f.latestFinalizedSlot < requestedSlot {
-			f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
-			if err != nil {
-				return nil, fmt.Errorf("fetching latest finalized Slot block num: %w", err)
-			}
-			f.logger.Info("got latest finalized slot block", zap.Uint64("latest_finalized_slot", f.latestFinalizedSlot), zap.Uint64("requested_block_num", requestedSlot))
+		f.logger.Info("got latest confirmed slot block", zap.Uint64("latest_confirmed_slot", f.latestConfirmedSlot), zap.Uint64("requested_block_num", requestedSlot))
+		//
+		if f.latestConfirmedSlot >= requestedSlot {
+			break
 		}
+		sleepDuration = f.latestBlockRetryInterval
+	}
 
-		return nil, nil
-	})
-
-	if err != nil {
-		return nil, false, err
+	if f.latestFinalizedSlot < requestedSlot {
+		f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
+		if err != nil {
+			return nil, false, fmt.Errorf("fetching latest finalized Slot block num: %w", err)
+		}
+		f.logger.Info("got latest finalized slot block", zap.Uint64("latest_finalized_slot", f.latestFinalizedSlot), zap.Uint64("requested_block_num", requestedSlot))
 	}
 
 	f.logger.Info("fetcher fetching block", zap.Uint64("block_num", requestedSlot), zap.Uint64("latest_finalized_slot", f.latestFinalizedSlot), zap.Uint64("latest_confirmed_slot", f.latestConfirmedSlot))
 
-	blockResult, skip, err := f.fetch(ctx, requestedSlot, f.latestConfirmedSlot)
+	blockResult, skip, err := f.fetch(ctx, client, requestedSlot, f.latestConfirmedSlot)
 	if err != nil {
 		return nil, false, fmt.Errorf("fetching block %d: %w", requestedSlot, err)
 	}
@@ -122,47 +111,32 @@ func (f *RPCFetcher) Fetch(ctx context.Context, requestedSlot uint64) (out *pbbs
 	return block, false, nil
 }
 
-func (f *RPCFetcher) fetch(ctx context.Context, requestedSlot uint64, lastConfirmBlockNum uint64) (*rpc.GetBlockResult, bool, error) {
-	currentSlot := requestedSlot
-	var lastErrorPrintedAt time.Time
-
+func (f *RPCFetcher) fetch(ctx context.Context, client *rpc.Client, requestedSlot uint64, lastConfirmBlockNum uint64) (*rpc.GetBlockResult, bool, error) {
 	for {
-		out, err := firecoreRPC.WithClients(f.rpcClients, func(client *rpc.Client) (*rpc.GetBlockResult, error) {
-			f.logger.Info("calling GetBlockWithOptions", zap.String("endpoints", fmt.Sprintf("%s", client)))
-			blockResult, err := client.GetBlockWithOpts(ctx, currentSlot, GetBlockOpts)
-			return blockResult, err
-		})
+		f.logger.Info("calling GetBlockWithOptions", zap.String("endpoints", fmt.Sprintf("%s", client)))
+		blockResult, err := client.GetBlockWithOpts(ctx, requestedSlot, GetBlockOpts)
+		if err != nil {
+			return nil, false, fmt.Errorf("getting block %d: %w", requestedSlot, err)
+		}
 
 		if err != nil {
 			var rpcErr *jsonrpc.RPCError
 			if errors.As(err, &rpcErr) {
 
 				if rpcErr.Code == -32009 || rpcErr.Code == -32007 {
-					f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", currentSlot))
+					f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", requestedSlot))
 					return nil, true, nil
 				}
 
 				if rpcErr.Code == -32004 {
-					//if currentSlot < lastConfirmBlockNum {
-					//	f.logger.Info("fetcher block was supposedly skipped", zap.Uint64("block_num", currentSlot))
-					//	return nil, true, nil
-					//}
-
-					f.logger.Warn("block not available. trying same block", zap.Uint64("block_num", currentSlot))
-					continue
+					return nil, false, fmt.Errorf("block not available %d", requestedSlot)
 				}
 			}
 
-			if lastErrorPrintedAt.IsZero() || time.Since(lastErrorPrintedAt) > 30*time.Second {
-				f.logger.Warn("error getting block", zap.Uint64("block_num", currentSlot), zap.Error(err))
-				lastErrorPrintedAt = time.Now()
-			}
-
-			//we retry forever!
-			continue
+			return nil, false, fmt.Errorf("getting block %d: %w", requestedSlot, err)
 		}
 
-		return out, false, nil
+		return blockResult, false, nil
 	}
 }
 
