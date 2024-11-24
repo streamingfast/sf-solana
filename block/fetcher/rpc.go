@@ -36,19 +36,23 @@ type fetchBlock func(ctx context.Context, requestedSlot uint64) (slot uint64, ou
 
 type RPCFetcher struct {
 	rpcClients               *firecoreRPC.Clients[*rpc.Client]
+	optimizeForSingleTarget  bool
 	latestConfirmedSlot      uint64
 	latestFinalizedSlot      uint64
 	latestBlockRetryInterval time.Duration
 	fetchInterval            time.Duration
 	lastFetchAt              time.Time
+	isMainnet                bool
 	logger                   *zap.Logger
 }
 
-func NewRPC(rpcClients *firecoreRPC.Clients[*rpc.Client], fetchInterval time.Duration, latestBlockRetryInterval time.Duration, logger *zap.Logger) *RPCFetcher {
+func NewRPC(rpcClients *firecoreRPC.Clients[*rpc.Client], fetchInterval time.Duration, latestBlockRetryInterval time.Duration, optimizeForSingleTarget bool, isMainnet bool, logger *zap.Logger) *RPCFetcher {
 	f := &RPCFetcher{
 		rpcClients:               rpcClients,
 		fetchInterval:            fetchInterval,
+		optimizeForSingleTarget:  optimizeForSingleTarget,
 		latestBlockRetryInterval: latestBlockRetryInterval,
+		isMainnet:                isMainnet,
 		logger:                   logger,
 	}
 	return f
@@ -60,8 +64,8 @@ func (f *RPCFetcher) IsBlockAvailable(requestedSlot uint64) bool {
 }
 
 func (f *RPCFetcher) Fetch(ctx context.Context, requestedSlot uint64) (out *pbbstream.Block, skip bool, err error) {
-	//THIS IS A FKG Ugly hack!
-	if requestedSlot >= 13334464 && requestedSlot <= 13334475 {
+	if f.isMainnet && requestedSlot >= 13334464 && requestedSlot <= 13334475 {
+		// know issue fetching these blocks on mainnet, ugly but works
 		return nil, true, nil
 	}
 
@@ -143,10 +147,10 @@ func (f *RPCFetcher) fetch(ctx context.Context, requestedSlot uint64, lastConfir
 				}
 
 				if rpcErr.Code == -32004 {
-					//if currentSlot < lastConfirmBlockNum {
-					//	f.logger.Info("fetcher block was supposedly skipped", zap.Uint64("block_num", currentSlot))
-					//	return nil, true, nil
-					//}
+					if f.optimizeForSingleTarget && currentSlot < lastConfirmBlockNum {
+						f.logger.Info("fetcher block was supposedly skipped", zap.Uint64("block_num", currentSlot))
+						return nil, true, nil
+					}
 
 					f.logger.Warn("block not available. trying same block", zap.Uint64("block_num", currentSlot))
 					continue

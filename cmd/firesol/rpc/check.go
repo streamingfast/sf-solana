@@ -48,7 +48,7 @@ func nextBlockRunE(logger *zap.Logger, _ logging.Tracer) firecore.CommandExecuto
 			rpcClients.Add(client)
 		}
 
-		rpcFetcher := fetcher.NewRPC(rpcClients, 1*time.Second, 1*time.Second, logger)
+		rpcFetcher := fetcher.NewRPC(rpcClients, 1*time.Second, 1*time.Second, false, false, logger)
 
 		var blockExists bool
 		for !blockExists {
