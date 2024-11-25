@@ -15,6 +15,7 @@ import (
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 	bin "github.com/streamingfast/binary"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+	firecoreRPC "github.com/streamingfast/firehose-core/rpc"
 	pbsol "github.com/streamingfast/firehose-solana/pb/sf/solana/type/v1"
 	sfsol "github.com/streamingfast/solana-go"
 	"go.uber.org/zap"
@@ -35,7 +36,6 @@ type fetchBlock func(ctx context.Context, requestedSlot uint64) (slot uint64, ou
 
 type RPCFetcher struct {
 	rpcClients               *firecoreRPC.Clients[*rpc.Client]
-	optimizeForSingleTarget  bool
 	latestConfirmedSlot      uint64
 	latestFinalizedSlot      uint64
 	latestBlockRetryInterval time.Duration
@@ -45,10 +45,9 @@ type RPCFetcher struct {
 	logger                   *zap.Logger
 }
 
-func NewRPC(fetchInterval time.Duration, latestBlockRetryInterval time.Duration, optimizeForSingleTarget bool, isMainnet bool, logger *zap.Logger) *RPCFetcher {
+func NewRPC(fetchInterval time.Duration, latestBlockRetryInterval time.Duration, isMainnet bool, logger *zap.Logger) *RPCFetcher {
 	f := &RPCFetcher{
 		fetchInterval:            fetchInterval,
-		optimizeForSingleTarget:  optimizeForSingleTarget,
 		latestBlockRetryInterval: latestBlockRetryInterval,
 		isMainnet:                isMainnet,
 		logger:                   logger,
@@ -59,6 +58,15 @@ func NewRPC(fetchInterval time.Duration, latestBlockRetryInterval time.Duration,
 func (f *RPCFetcher) IsBlockAvailable(requestedSlot uint64) bool {
 	f.logger.Info("checking if block is available", zap.Uint64("request_block_num", requestedSlot), zap.Uint64("latest_confirmed_slot", f.latestConfirmedSlot))
 	return requestedSlot <= f.latestConfirmedSlot
+}
+
+func FetchHeadBlockNumber(ctx context.Context, client *rpc.Client) (uint64, error) {
+	num, err := client.GetSlot(ctx, rpc.CommitmentConfirmed)
+	if err != nil {
+		return 0, fmt.Errorf("fetching head block num: %w", err)
+	}
+	return num, nil
+
 }
 
 func (f *RPCFetcher) Fetch(ctx context.Context, client *rpc.Client, requestedSlot uint64) (b *pbbstream.Block, skipped bool, err error) {

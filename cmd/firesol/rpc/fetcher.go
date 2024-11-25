@@ -12,7 +12,6 @@ import (
 	"github.com/streamingfast/cli/sflags"
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-core/blockpoller"
-	firecoreRPC "github.com/streamingfast/firehose-core/rpc"
 	"github.com/streamingfast/firehose-solana/block/fetcher"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
@@ -32,7 +31,6 @@ func NewFetchCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	cmd.Flags().Duration("latest-block-retry-interval", time.Second, "interval between fetch")
 	cmd.Flags().Duration("max-block-fetch-duration", 3*time.Second, "interval between fetch")
 	cmd.Flags().Int("block-fetch-batch-size", 10, "Number of blocks to fetch in a single batch")
-	cmd.Flags().Bool("optimize-single-target", false, "Only set this if every endpoint is pointing to a single node (not a cluster). It allows reducing the number of RPC calls by making assumptions about the last block")
 	cmd.Flags().String("network", "mainnet", "network to fetch from (mainnet, devnet, testnet) -- only used to patch a known issue on some slots")
 
 	return cmd
@@ -66,7 +64,6 @@ func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecut
 		}
 
 		latestBlockRetryInterval := sflags.MustGetDuration(cmd, "latest-block-retry-interval")
-		optimizeSingleTarget := sflags.MustGetBool(cmd, "optimize-single-target")
 		var isMainnet bool
 		switch sflags.MustGetString(cmd, "network") {
 		case "mainnet", "mainnet-beta":
@@ -74,7 +71,7 @@ func fetchRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecut
 		}
 
 		poller := blockpoller.New[*rpc.Client](
-			fetcher.NewRPC(fetchInterval, latestBlockRetryInterval, optimizeSingleTarget, isMainnet, logger),
+			fetcher.NewRPC(fetchInterval, latestBlockRetryInterval, isMainnet, logger),
 			blockpoller.NewFireBlockHandler("type.googleapis.com/sf.solana.type.v1.Block"),
 			rpcClients,
 			blockpoller.WithLogger[*rpc.Client](logger),
