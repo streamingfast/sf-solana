@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v1.1.1
+
+* Fix "unable to fetch block was skipped and should not have been requested" but when an endpoint is a load balancer pointing to different nodes -- this removes an optimization that reduces the number of RPC calls by assuming that no new block will appear below the 'latest slot' of your node. If you are indeed pointing to only single solana nodes, you can use the new `--optimize-single-target` flag to re-enable this optimization.
+* Fix startup always looking for 'first block' instead of 'cursor block', failing unnecessarily on non-archive nodes
+* Add --network flag (default: mainnet) -- this flag is used only to enable a special fix around block 13334464, which you don't want to skip on testnet or devnet.
+
 ## v1.1.0
 
 * Update to `firehose-core` version `v1.6.5`.
