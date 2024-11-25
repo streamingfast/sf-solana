@@ -112,32 +112,27 @@ func (f *RPCFetcher) Fetch(ctx context.Context, client *rpc.Client, requestedSlo
 }
 
 func (f *RPCFetcher) fetch(ctx context.Context, client *rpc.Client, requestedSlot uint64, lastConfirmBlockNum uint64) (*rpc.GetBlockResult, bool, error) {
-	for {
-		f.logger.Info("calling GetBlockWithOptions", zap.String("endpoints", fmt.Sprintf("%s", client)))
-		blockResult, err := client.GetBlockWithOpts(ctx, requestedSlot, GetBlockOpts)
-		if err != nil {
-			return nil, false, fmt.Errorf("getting block %d: %w", requestedSlot, err)
-		}
+	f.logger.Info("calling GetBlockWithOptions", zap.String("endpoints", fmt.Sprintf("%s", client)))
+	blockResult, err := client.GetBlockWithOpts(ctx, requestedSlot, GetBlockOpts)
 
-		if err != nil {
-			var rpcErr *jsonrpc.RPCError
-			if errors.As(err, &rpcErr) {
+	if err != nil {
+		var rpcErr *jsonrpc.RPCError
+		if errors.As(err, &rpcErr) {
 
-				if rpcErr.Code == -32009 || rpcErr.Code == -32007 {
-					f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", requestedSlot))
-					return nil, true, nil
-				}
-
-				if rpcErr.Code == -32004 {
-					return nil, false, fmt.Errorf("block not available %d", requestedSlot)
-				}
+			if rpcErr.Code == -32009 || rpcErr.Code == -32007 {
+				f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", requestedSlot))
+				return nil, true, nil
 			}
 
-			return nil, false, fmt.Errorf("getting block %d: %w", requestedSlot, err)
+			if rpcErr.Code == -32004 {
+				return nil, false, fmt.Errorf("block not available %d", requestedSlot)
+			}
 		}
 
-		return blockResult, false, nil
+		return nil, false, fmt.Errorf("getting block %d: %w", requestedSlot, err)
 	}
+
+	return blockResult, false, nil
 }
 
 func blockFromBlockResult(slot uint64, finalizedSlot uint64, result *rpc.GetBlockResult, logger *zap.Logger) (*pbbstream.Block, error) {
