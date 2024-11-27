@@ -8,7 +8,6 @@ replace (
 	github.com/gagliardetto/solana-go => github.com/streamingfast/gagliardetto-solana-go v0.0.0-20240115191424-05c37cd0760d
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
 	github.com/jhump/protoreflect => github.com/streamingfast/protoreflect v0.0.0-20231205191344-4b629d20ce8d
-//github.com/streamingfast/firehose-core => ../firehose-core
 )
 
 require (
@@ -17,11 +16,12 @@ require (
 	github.com/klauspost/compress v1.17.11
 	github.com/mr-tron/base58 v1.2.0
 	github.com/spf13/cobra v1.7.0
+	github.com/spf13/pflag v1.0.5
 	github.com/streamingfast/binary v0.0.0-20240116152459-ebe30de95370
 	github.com/streamingfast/bstream v0.0.2-0.20241108153156-a5c6bc006f41
 	github.com/streamingfast/cli v0.0.4-0.20240412191021-5f81842cb71d
 	github.com/streamingfast/dstore v0.1.1-0.20241011152904-9acd6205dc14
-	github.com/streamingfast/firehose-core v1.6.7-0.20241127135923-41deda86306f
+	github.com/streamingfast/firehose-core v1.6.7-0.20241127141805-5fb676a6b73f
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/solana-go v0.5.1-0.20230622180848-8faf68a7cb1d
 	github.com/test-go/testify v1.1.4
@@ -139,7 +139,6 @@ require (
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.15.0 // indirect
 	github.com/streamingfast/dauth v0.0.0-20240222213226-519afc16cf84 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
