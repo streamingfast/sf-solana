@@ -671,8 +671,10 @@ github.com/streamingfast/dstore v0.1.1-0.20241011152904-9acd6205dc14 h1:/2HxIOzA
 github.com/streamingfast/dstore v0.1.1-0.20241011152904-9acd6205dc14/go.mod h1:kNzxgv2MzYFn2T4kelBVpGp/yP/1njtr3+csWuqxK3w=
 github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 h1:K6mJPvh1jAL+/gBS7Bh9jyzWaTib6N47m06gZOTUPwQ=
 github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839/go.mod h1:huOJyjMYS6K8upTuxDxaNd+emD65RrXoVBvh8f1/7Ns=
-github.com/streamingfast/firehose-core v1.6.7-0.20241121145805-0f91a0021712 h1:CswUjGoQ24rvfdn/Oaw1Y4ApAFNVWL7rWMMiTJqYoAY=
-github.com/streamingfast/firehose-core v1.6.7-0.20241121145805-0f91a0021712/go.mod h1:IqqgMJIi9RIaaxfY7o+vXEioLU0Iu5sQ1LNF7ygCOv8=
+github.com/streamingfast/firehose-core v1.6.7-0.20241126143606-51f831a2d2e8 h1:HqxVjj6pPn5X0244lJ/VHvgfgNrnrt7fFxlYkDk/gtY=
+github.com/streamingfast/firehose-core v1.6.7-0.20241126143606-51f831a2d2e8/go.mod h1:IqqgMJIi9RIaaxfY7o+vXEioLU0Iu5sQ1LNF7ygCOv8=
+github.com/streamingfast/firehose-core v1.6.7-0.20241126143726-2d88fb9912a9/go.mod h1:IqqgMJIi9RIaaxfY7o+vXEioLU0Iu5sQ1LNF7ygCOv8=
+github.com/streamingfast/firehose-core v1.6.7-0.20241127135923-41deda86306f/go.mod h1:IqqgMJIi9RIaaxfY7o+vXEioLU0Iu5sQ1LNF7ygCOv8=
 github.com/streamingfast/gagliardetto-solana-go v0.0.0-20240115191424-05c37cd0760d h1:Db3yKJeN5DWPz8pesR9tuFXdbs0MnpRLmov+ttsHoTU=
 github.com/streamingfast/gagliardetto-solana-go v0.0.0-20240115191424-05c37cd0760d/go.mod h1:i+7aAyNDTHG0jK8GZIBSI4OVvDqkt2Qx+LklYclRNG8=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
@@ -723,8 +725,7 @@ github.com/test-go/testify v1.1.4/go.mod h1:rH7cfJo/47vWGdi4GPj16x3/t1xGOj2YxzmN
 github.com/tidwall/gjson v1.6.3/go.mod h1:BaHyNc5bjzYkPqgLq7mdVzeiRtULKULXLgZFKsxEHI0=
 github.com/tidwall/gjson v1.9.3/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/gjson v1.11.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
-github.com/tidwall/gjson v1.14.1 h1:iymTbGkQBhveq21bEvAQ81I0LEBork8BFe1CUZXdyuo=
-github.com/tidwall/gjson v1.14.1/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
+github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
 github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=

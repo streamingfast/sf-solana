@@ -60,13 +60,12 @@ func (f *RPCFetcher) IsBlockAvailable(requestedSlot uint64) bool {
 	return requestedSlot <= f.latestConfirmedSlot
 }
 
-func FetchHeadBlockNumber(ctx context.Context, client *rpc.Client) (uint64, error) {
+func (f *RPCFetcher) FetchSortValue(ctx context.Context, client *rpc.Client) (sortValue uint64, err error) {
 	num, err := client.GetSlot(ctx, rpc.CommitmentConfirmed)
 	if err != nil {
 		return 0, fmt.Errorf("fetching head block num: %w", err)
 	}
 	return num, nil
-
 }
 
 func (f *RPCFetcher) Fetch(ctx context.Context, client *rpc.Client, requestedSlot uint64) (b *pbbstream.Block, skipped bool, err error) {
