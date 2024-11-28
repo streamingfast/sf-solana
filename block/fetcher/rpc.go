@@ -142,7 +142,7 @@ func (f *RPCFetcher) fetch(ctx context.Context, requestedSlot uint64, lastConfir
 			if errors.As(err, &rpcErr) {
 
 				if rpcErr.Code == -32009 || rpcErr.Code == -32007 {
-					f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", currentSlot))
+					f.logger.Info("fetcher block was skipped", zap.Uint64("block_num", currentSlot), zap.Int("rpc_error_code", rpcErr.Code))
 					return nil, true, nil
 				}
 
