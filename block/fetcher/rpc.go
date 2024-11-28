@@ -28,7 +28,7 @@ import (
 
 var MaxSupportedTransactionVersion = uint64(0)
 var GetBlockOpts = &rpc.GetBlockOpts{
-	Commitment:                     rpc.CommitmentConfirmed,
+	Commitment:                     rpc.CommitmentFinalized,
 	MaxSupportedTransactionVersion: &MaxSupportedTransactionVersion,
 }
 
@@ -88,8 +88,7 @@ func (f *RPCFetcher) Fetch(ctx context.Context, requestedSlot uint64) (out *pbbs
 		}
 
 		if f.latestFinalizedSlot < requestedSlot {
-			//f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
-			f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentConfirmed)
+			f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
 			if err != nil {
 				return nil, fmt.Errorf("fetching latest finalized Slot block num: %w", err)
 			}
