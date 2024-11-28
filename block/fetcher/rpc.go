@@ -88,7 +88,8 @@ func (f *RPCFetcher) Fetch(ctx context.Context, requestedSlot uint64) (out *pbbs
 		}
 
 		if f.latestFinalizedSlot < requestedSlot {
-			f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
+			//f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentFinalized)
+			f.latestFinalizedSlot, err = client.GetSlot(ctx, rpc.CommitmentConfirmed)
 			if err != nil {
 				return nil, fmt.Errorf("fetching latest finalized Slot block num: %w", err)
 			}
