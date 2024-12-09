@@ -137,8 +137,6 @@ func (f *RPCFetcher) fetch(ctx context.Context, client *rpc.Client, requestedSlo
 			}
 
 			if rpcErr.Code == -32004 {
-				640
-				641 642 643 644(639) head
 				return nil, false, fmt.Errorf("block not available %d", requestedSlot)
 			}
 		}
