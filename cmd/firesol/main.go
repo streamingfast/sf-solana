@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/firehose-core/cmd/tools"
@@ -39,8 +38,6 @@ func newFetchCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 		Short: "fetch blocks from different sources",
 		Args:  cobra.ExactArgs(2),
 	}
-	time.Now().UnixMilli()
 	cmd.AddCommand(rpc.NewFetchCmd(logger, tracer))
-	cmd.AddCommand(rpc.NewNextBlockCmd(logger, tracer))
 	return cmd
 }
