@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Remove unused legacy 'sf.solana.transforms.v1' from protobuf definitions
+
 ## v1.1.2
 * Log RPC error code when block is skipped
 
@@ -332,4 +336,3 @@ interval: <number>`, if you had two different value before, pick the biggest of 
   * Removed `relayer-merger-addr`
   * Removed `relayer-buffer-size`
   * Removed `relayer-min-start-offset`
-
